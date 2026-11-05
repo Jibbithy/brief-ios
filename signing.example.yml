@@ -1,0 +1,23 @@
+# Copy to signing.yml (gitignored) and put your Apple developer team id in it.
+#
+# It lives here rather than in Xcode's Signing & Capabilities pane because
+# xcodegen regenerates the .xcodeproj wholesale - a team picked in the GUI is
+# erased by the next `xcodegen generate`.
+#
+# MUST MATCH agents-ios/signing.yml and rack-control-ios/signing.yml. The shared
+# keychain group expands to $(AppIdentifierPrefix)com.example.shared, and
+# AppIdentifierPrefix IS the team id - two teams means two groups and the hub
+# token is silently not shared.
+targets:
+  Brief:
+    settings:
+      base:
+        DEVELOPMENT_TEAM: YOUR_TEAM_ID
+  BriefWidget:
+    settings:
+      base:
+        DEVELOPMENT_TEAM: YOUR_TEAM_ID
+  BriefTests:
+    settings:
+      base:
+        DEVELOPMENT_TEAM: YOUR_TEAM_ID

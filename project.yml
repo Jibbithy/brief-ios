@@ -1,0 +1,119 @@
+# The Xcode project is GENERATED from this file by xcodegen, not hand-edited
+# (same as agents-ios and rack-control-ios).
+#   brew install xcodegen && xcodegen generate
+name: Brief
+include:
+  # Gitignored. A fresh clone copies signing.example.yml to signing.yml.
+  - path: signing.yml
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+targets:
+  Brief:
+    type: application
+    platform: iOS
+    sources:
+      # Info.plist is the INFOPLIST_FILE below, not a resource.
+      - path: Brief
+        excludes: [Info.plist]
+    dependencies:
+      - target: BriefWidget
+    # KEYCHAIN: the shared rack group comes FIRST, exactly as in agents-ios and
+    # rack-control-ios. SecItemAdd with no access group lands in the first
+    # entry, and TokenStore is byte-identical to theirs - so a phone that
+    # already has Agents or Rack Control opens Brief with the token already in
+    # place, and the widget (which lists the same group) can read it.
+    #
+    # APP GROUP: the cached brief lives in the group container so the widget
+    # draws from it without a network round trip.
+    #
+    # PUSH: aps-environment development, as in agents-ios - every build this
+    # rack signs uses a development profile, so the device token is SANDBOX.
+    entitlements:
+      path: Brief.entitlements
+      properties:
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)com.example.shared
+        com.apple.security.application-groups:
+          - group.com.example.brief
+        aps-environment: development
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.brief
+        GENERATE_INFOPLIST_FILE: YES
+        # Holds UIBackgroundModes only - the plist generator silently drops an
+        # INFOPLIST_KEY_UIBackgroundModes setting (see agents-ios).
+        INFOPLIST_FILE: Brief/Info.plist
+        CODE_SIGN_STYLE: Automatic
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        INFOPLIST_KEY_CFBundleDisplayName: Brief
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        SWIFT_VERSION: "6.0"
+        ENABLE_USER_SCRIPT_SANDBOXING: YES
+        TARGETED_DEVICE_FAMILY: "1"
+  # Home-screen (small, medium) and lock-screen (rectangular, inline) widget.
+  # Reads the brief the app cached in the App Group, and fetches a fresh one
+  # itself when the Keychain will hand over the token.
+  BriefWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: BriefWidget
+        excludes: [Info.plist]
+      - Brief/Shared
+      # The Deck faces, listed in the widget's UIAppFonts.
+      - path: Brief/Fonts
+        buildPhase: resources
+    entitlements:
+      path: BriefWidget.entitlements
+      properties:
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)com.example.shared
+        com.apple.security.application-groups:
+          - group.com.example.brief
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.brief.widget
+        INFOPLIST_FILE: BriefWidget/Info.plist
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Brief
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        CODE_SIGN_STYLE: Automatic
+        SWIFT_VERSION: "6.0"
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) WIDGET_EXTENSION"
+        SKIP_INSTALL: YES
+        APPLICATION_EXTENSION_API_ONLY: YES
+        ENABLE_USER_SCRIPT_SANDBOXING: YES
+        TARGETED_DEVICE_FAMILY: "1"
+  # Unit tests only: decoding, ordering, and how a hub answer is classified.
+  BriefTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [BriefTests]
+    dependencies:
+      - target: Brief
+    settings:
+      base:
+        # Pinned, not derived from the target name - see agents-ios.
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.brief-tests
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: YES
+
+# xcodegen generates NO schemes unless declared, and a scheme whose test action
+# is empty "succeeds" having run nothing.
+schemes:
+  Brief:
+    build:
+      targets:
+        Brief: all
+        BriefTests: [test]
+    test:
+      targets:
+        - BriefTests
