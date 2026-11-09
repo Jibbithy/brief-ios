@@ -1,5 +1,7 @@
 # Brief
 
+[![CI](https://github.com/Jibbithy/brief-ios/actions/workflows/ci.yml/badge.svg)](https://github.com/Jibbithy/brief-ios/actions/workflows/ci.yml)
+
 A native iOS morning briefing app with a home screen widget. It brings important email, calendar events, weather and home server status into one daily summary, along with a to-do list.
 
 Built with SwiftUI and WidgetKit. Includes 57 unit tests.
